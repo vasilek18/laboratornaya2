@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 from skimage.exposure import match_histograms
 
-# ИЗМЕНЕНО: путь считается от папки, где лежит скрипт, а не от текущей папки IDLE
+#  путь считается от папки, где лежит скрипт, а не от текущей папки IDLE
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Lab2_Media")
 IN_DIR = os.path.join(BASE, "data", "input")
 OUT_DIR = os.path.join(BASE, "data", "output")
@@ -36,27 +36,13 @@ def color_by_template(img, template):
     matched = match_histograms(src, ref, channel_axis=-1)
     return Image.fromarray(np.clip(matched, 0, 255).astype(np.uint8))
 
-# НОВОЕ: отдельная функция чтения картинки
+# отдельная функция чтения картинки
 def load_image(path):
     with open(path, "rb") as f:
         img = Image.open(f).convert("RGB")
         img.load()
     return img
 
-# ИЗМЕНЕНО: шаблон читается здесь же, а недоступные файлы пропускаются
-def pick_template(current_name):
-    """Шаблон: другой файл из input, который удаётся прочитать."""
-    try:
-        files = sorted(os.listdir(IN_DIR))
-    except OSError:
-        return None
-    for fname in files:
-        if fname != current_name and fname.lower().endswith((".jpg", ".jpeg", ".png")):
-            try:
-                return load_image(os.path.join(IN_DIR, fname))
-            except OSError:      # PermissionError входит в OSError
-                continue
-    return None
 
 def make_template():
     """Шаблон, заданный в коде: тёплый закатный градиент."""
@@ -72,7 +58,7 @@ def main():
     name = input("Какой файл обработать (image1.jpg или image2.png)? ").strip()
     path = os.path.join(IN_DIR, name)
 
-    # ИЗМЕНЕНО: в try читается ТОЛЬКО выбранный пользователем файл
+    #  в try читается ТОЛЬКО выбранный пользователем файл
     try:
         img = load_image(path)
     except PermissionError:
@@ -88,13 +74,13 @@ def main():
         write_log(name, "Ошибка открытия")
         return
 
-    # НОВОЕ: шаблон берётся отдельно, его ошибки не влияют на сообщение об основном файле
+    #  шаблон берётся отдельно, его ошибки не влияют на сообщение об основном файле
     template = make_template()
 
     result = convolution(img)
     result = color_by_template(result, template)
 
-    # ИЗМЕНЕНО: сохранение тоже защищено
+    #  сохранение тоже защищено
     out_path = os.path.join(OUT_DIR, "result.jpg")
     try:
         result.save(out_path, quality=95)
